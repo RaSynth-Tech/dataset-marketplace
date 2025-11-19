@@ -24,6 +24,19 @@ A scalable, multi-agent system platform for buying and selling datasets. This pl
   - Purchase management
   - User management
 
+## Tooling & Software Requirements
+
+Install these tools before working on the project:
+
+- **Git** 2.40+ for version control (`git --version`)
+- **Docker Desktop** with **Docker Compose** v2 for container orchestration (`docker --version`, `docker compose version`)
+- **Python** 3.11+ with `pip` for backend development (`python3 --version`)
+- **Node.js** 18+ with `npm` for the frontend (`node --version`)
+- **PostgreSQL** 14+ (server + `psql`) if you want to run the database outside Docker
+- *(Optional)* **pgAdmin** or another SQL client for inspecting tables and data
+
+> Tip: On macOS you can install most dependencies via Homebrew: `brew install git python node postgresql`.
+
 ## Architecture
 
 ### Backend Structure
@@ -53,6 +66,59 @@ frontend/
 │   ├── services/       # API services
 │   └── App.jsx         # Main app component
 ```
+
+## Database Setup
+
+You can rely on the PostgreSQL service defined in `docker-compose.yml` or provision your own local instance. For a manual/local Postgres setup:
+
+1. Start PostgreSQL (ensure it listens on `localhost:5432`).
+2. Create the database and user:
+   ```bash
+   createdb dataset_platform
+   createuser dataset_user --pwprompt
+   psql -d dataset_platform -c "GRANT ALL PRIVILEGES ON DATABASE dataset_platform TO dataset_user;"
+   ```
+3. Copy `backend/.env.example` to `backend/.env` and update:
+   ```
+   DATABASE_URL=postgresql+asyncpg://dataset_user:<password>@localhost:5432/dataset_platform
+   ```
+4. The first backend run will auto-create tables via SQLModel.
+
+Prefer Docker? From the repo root run:
+```bash
+docker compose up db -d
+```
+The service uses credentials from `.env` / `.env.example`.
+
+## First-Time Local Run
+
+1. **Clone & prepare directories**
+   ```bash
+   git clone <repository-url>
+   cd Agent-sample
+   ```
+2. **Configure environment variables**
+   - Copy `.env.example` to `.env` at the repo root (for Docker Compose) and within `backend/`.
+   - Update secrets: `POSTGRES_PASSWORD`, `DATABASE_URL`, `JWT_SECRET`, etc.
+3. **Install backend dependencies**
+   ```bash
+   cd backend
+   python -m venv venv
+   source venv/bin/activate  # Windows: venv\Scripts\activate
+   pip install -r requirements.txt
+   ```
+4. **Install frontend dependencies**
+   ```bash
+   cd ../frontend
+   npm install
+   ```
+5. **Start services**
+   - *Docker path*: from repo root run `docker compose up -d` to boot Postgres, backend, and frontend together.
+   - *Manual path*: ensure Postgres is running, then start the backend with `uvicorn app.main:app --reload` and the frontend with `npm run dev`.
+6. **Verify**
+   - Frontend at `http://localhost:3000`
+   - API docs at `http://localhost:8000/docs`
+   - Database tables visible via `psql`/pgAdmin
 
 ## Getting Started
 

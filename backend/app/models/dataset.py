@@ -20,7 +20,7 @@ class Dataset(Base):
     column_count = Column(Integer)
     format = Column(String(50))  # CSV, JSON, Parquet, etc.
     sample_data = Column(JSON)  # Sample rows for preview
-    metadata = Column(JSON, default=dict)  # Additional metadata
+    metadata_json = Column("metadata", JSON, default=dict)  # Additional metadata stored in column named 'metadata'
     file_path = Column(String(500))  # Path to actual dataset file
     seller_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     is_active = Column(Boolean, default=True)
@@ -40,8 +40,10 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
-    username = Column(String(100), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
+    username = Column(String(100), unique=True, index=True, nullable=True)
+    hashed_password = Column(String(255), nullable=True)
+    google_id = Column(String(255), unique=True, index=True, nullable=True)
+    avatar_url = Column(String(500), nullable=True)
     full_name = Column(String(255))
     is_seller = Column(Boolean, default=False)
     is_active = Column(Boolean, default=True)

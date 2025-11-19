@@ -1,5 +1,5 @@
 """Transaction agent for handling purchases and payments."""
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from sqlalchemy.orm import Session
 from datetime import datetime
 import uuid

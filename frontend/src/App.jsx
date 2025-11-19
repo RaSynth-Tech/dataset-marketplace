@@ -7,18 +7,26 @@ import DatasetDetail from './pages/DatasetDetail'
 import MyPurchases from './pages/MyPurchases'
 import './App.css'
 
+import { AuthProvider } from './context/AuthContext'
+import LoginCallback from './components/LoginCallback'
+import Login from './pages/Login'
+
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Navbar />
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/dataset/:id" element={<DatasetDetail />} />
-          <Route path="/purchases" element={<MyPurchases />} />
-        </Routes>
-      </div>
+      <AuthProvider>
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
+          <Navbar />
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/dataset/:id" element={<DatasetDetail />} />
+            <Route path="/purchases" element={<MyPurchases />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/auth/callback" element={<LoginCallback />} />
+          </Routes>
+        </div>
+      </AuthProvider>
     </Router>
   )
 }

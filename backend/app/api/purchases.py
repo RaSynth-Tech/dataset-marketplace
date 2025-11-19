@@ -6,6 +6,7 @@ from app.database import get_db
 from app.schemas.dataset import PurchaseCreate, PurchaseResponse
 from app.agents.agent_orchestrator import AgentOrchestrator
 from app.models.dataset import Purchase, User
+from app.api.deps import get_current_user
 import logging
 
 router = APIRouter(prefix="/api/purchases", tags=["purchases"])
@@ -16,18 +17,18 @@ orchestrator = AgentOrchestrator()
 
 
 @router.post("/", response_model=PurchaseResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=PurchaseResponse, status_code=status.HTTP_201_CREATED)
 async def create_purchase(
     purchase: PurchaseCreate,
     db: Session = Depends(get_db),
-    # In production, get from authentication
-    user_id: int = 1
+    current_user: User = Depends(get_current_user)
 ):
     """Purchase a dataset using the transaction agent."""
     result = await orchestrator.execute(
         "transaction",
         {
             "db": db,
-            "user_id": user_id,
+            "user_id": current_user.id,
             "dataset_id": purchase.dataset_id
         }
     )
@@ -41,11 +42,14 @@ async def create_purchase(
     return PurchaseResponse.model_validate(result["purchase"])
 
 
-@router.get("/user/{user_id}", response_model=List[PurchaseResponse])
-async def get_user_purchases(user_id: int, db: Session = Depends(get_db)):
-    """Get all purchases for a user."""
+@router.get("/mine", response_model=List[PurchaseResponse])
+async def get_user_purchases(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get all purchases for the current user."""
     purchases = db.query(Purchase).filter(
-        Purchase.buyer_id == user_id
+        Purchase.buyer_id == current_user.id
     ).order_by(Purchase.purchased_at.desc()).all()
     return purchases
 

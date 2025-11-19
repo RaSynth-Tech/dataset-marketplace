@@ -1,5 +1,5 @@
 """Pydantic schemas for dataset operations."""
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
@@ -9,14 +9,14 @@ class DatasetBase(BaseModel):
     title: str
     description: str
     category: Optional[str] = None
-    tags: Optional[List[str]] = []
+    tags: Optional[List[str]] = Field(default_factory=list)
     price: float
     size_mb: float
     row_count: Optional[int] = None
     column_count: Optional[int] = None
     format: Optional[str] = None
     sample_data: Optional[Dict[str, Any]] = None
-    metadata: Optional[Dict[str, Any]] = {}
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 class DatasetCreate(DatasetBase):
@@ -32,6 +32,7 @@ class DatasetUpdate(BaseModel):
     tags: Optional[List[str]] = None
     price: Optional[float] = None
     is_active: Optional[bool] = None
+    metadata: Optional[Dict[str, Any]] = None
 
 
 class DatasetResponse(DatasetBase):
@@ -44,8 +45,9 @@ class DatasetResponse(DatasetBase):
     review_count: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, alias="metadata_json")
 
-    model_config = {"from_attributes": True}
+    model_config = {"from_attributes": True, "populate_by_name": True}
 
 
 class DatasetSearch(BaseModel):

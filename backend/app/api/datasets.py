@@ -5,7 +5,8 @@ from typing import List
 from app.database import get_db
 from app.schemas.dataset import DatasetResponse, DatasetSearch, DatasetCreate, DatasetUpdate
 from app.agents.agent_orchestrator import AgentOrchestrator
-from app.models.dataset import Dataset
+from app.models.dataset import Dataset, User
+from app.api.deps import get_current_user
 import logging
 
 router = APIRouter(prefix="/api/datasets", tags=["datasets"])
@@ -63,14 +64,17 @@ async def get_dataset(dataset_id: int, db: Session = Depends(get_db)):
     return dataset
 
 
-@router.get("/recommendations/{user_id}", response_model=dict)
-async def get_recommendations(user_id: int, db: Session = Depends(get_db)):
-    """Get dataset recommendations for a user."""
+@router.get("/recommendations", response_model=dict)
+async def get_recommendations(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get dataset recommendations for the current user."""
     result = await orchestrator.execute(
         "recommendation",
         {
             "db": db,
-            "user_id": user_id
+            "user_id": current_user.id
         }
     )
     
@@ -89,14 +93,18 @@ async def get_recommendations(user_id: int, db: Session = Depends(get_db)):
 async def create_dataset(
     dataset: DatasetCreate,
     db: Session = Depends(get_db),
-    # In production, add authentication
-    # current_user: User = Depends(get_current_user)
+    current_user: User = Depends(get_current_user)
 ):
     """Create a new dataset (seller only)."""
-    # For demo, using seller_id = 1
-    seller_id = 1
+    # In a real app, check if current_user.is_seller
     
-    db_dataset = Dataset(**dataset.dict(), seller_id=seller_id)
+    dataset_data = dataset.model_dump()
+    metadata_payload = dataset_data.pop("metadata", None)
+    db_dataset = Dataset(
+        **dataset_data,
+        metadata_json=metadata_payload or {},
+        seller_id=current_user.id
+    )
     db.add(db_dataset)
     db.commit()
     db.refresh(db_dataset)
@@ -115,8 +123,11 @@ async def update_dataset(
         raise HTTPException(status_code=404, detail="Dataset not found")
     
     update_data = dataset_update.dict(exclude_unset=True)
+    metadata_payload = update_data.pop("metadata", None)
     for field, value in update_data.items():
         setattr(dataset, field, value)
+    if metadata_payload is not None:
+        dataset.metadata_json = metadata_payload
     
     db.commit()
     db.refresh(dataset)

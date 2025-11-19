@@ -2,12 +2,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import engine, Base
-from app.api import datasets, purchases, support, users
-import logging
+from starlette.middleware.sessions import SessionMiddleware
+from app.core.config import settings
+from app.api import datasets, purchases, support, users, auth
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# ... (logging config)
 
 # Create database tables
 Base.metadata.create_all(bind=engine)
@@ -17,6 +16,9 @@ app = FastAPI(
     description="A scalable platform for buying and selling datasets with multi-agent system",
     version="1.0.0"
 )
+
+# Session Middleware (Required for Authlib)
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 # CORS middleware
 app.add_middleware(
@@ -28,6 +30,7 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth.router)
 app.include_router(datasets.router)
 app.include_router(purchases.router)
 app.include_router(support.router)
