@@ -55,15 +55,6 @@ async def search_datasets(
     }
 
 
-@router.get("/{dataset_id}", response_model=DatasetResponse)
-async def get_dataset(dataset_id: int, db: Session = Depends(get_db)):
-    """Get a specific dataset by ID."""
-    dataset = db.query(Dataset).filter(Dataset.id == dataset_id).first()
-    if not dataset:
-        raise HTTPException(status_code=404, detail="Dataset not found")
-    return dataset
-
-
 @router.get("/recommendations", response_model=dict)
 async def get_recommendations(
     db: Session = Depends(get_db),
@@ -87,6 +78,16 @@ async def get_recommendations(
         "recommendations": recommendations,
         "count": result["count"]
     }
+
+
+@router.get("/{dataset_id}", response_model=DatasetResponse)
+async def get_dataset(dataset_id: int, db: Session = Depends(get_db)):
+    """Get a specific dataset by ID."""
+    dataset = db.query(Dataset).filter(Dataset.id == dataset_id).first()
+    if not dataset:
+        raise HTTPException(status_code=404, detail="Dataset not found")
+    return dataset
+
 
 
 @router.post("/", response_model=DatasetResponse, status_code=status.HTTP_201_CREATED)

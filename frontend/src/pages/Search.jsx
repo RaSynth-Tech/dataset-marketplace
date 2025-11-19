@@ -4,6 +4,7 @@ import { datasetService } from '../services/api'
 
 function Search() {
   const [datasets, setDatasets] = useState([])
+  const [externalDatasets, setExternalDatasets] = useState([])
   const [loading, setLoading] = useState(false)
   const [searchParams, setSearchParams] = useState({
     query: '',
@@ -28,6 +29,7 @@ function Search() {
       }
       const data = await datasetService.search(params)
       setDatasets(data.datasets || [])
+      setExternalDatasets(data.external_datasets || [])
       setTotal(data.total || 0)
     } catch (error) {
       console.error('Search error:', error)
@@ -127,6 +129,50 @@ function Search() {
           {datasets.length === 0 && !loading && (
             <div className="text-center py-12 text-gray-500 dark:text-gray-400">
               No datasets found. Try adjusting your search criteria.
+            </div>
+          )}
+
+          {/* External Datasets Section */}
+          {externalDatasets.length > 0 && (
+            <div className="mt-12">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                🌐 External Datasets from Online Sources
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {externalDatasets.map((dataset, index) => (
+                  <a
+                    key={index}
+                    href={dataset.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="bg-gradient-to-br from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg shadow-md hover:shadow-xl transition p-6 border-2 border-purple-200 dark:border-purple-700"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white flex-1">{dataset.title}</h3>
+                      <svg className="w-5 h-5 text-purple-600 dark:text-purple-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    </div>
+                    <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm line-clamp-3">{dataset.description}</p>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      <span className="inline-block bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 text-xs px-2 py-1 rounded">
+                        {dataset.source}
+                      </span>
+                      <span className="inline-block bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs px-2 py-1 rounded">
+                        {dataset.format}
+                      </span>
+                      {dataset.size_estimate && (
+                        <span className="inline-block bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs px-2 py-1 rounded">
+                          {dataset.size_estimate}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xs text-purple-600 dark:text-purple-400 font-medium">
+                      Click to view on {dataset.source} →
+                    </div>
+                  </a>
+                ))}
+              </div>
             </div>
           )}
         </>
