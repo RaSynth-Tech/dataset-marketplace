@@ -10,6 +10,7 @@ import './App.css'
 import { AuthProvider } from './context/AuthContext'
 import LoginCallback from './components/LoginCallback'
 import Login from './pages/Login'
+import Support from './pages/Support'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <Route path="/search" element={<Search />} />
             <Route path="/dataset/:id" element={<DatasetDetail />} />
             <Route path="/purchases" element={<MyPurchases />} />
+            <Route path="/support" element={<Support />} />
             <Route path="/login" element={<Login />} />
             <Route path="/auth/callback" element={<LoginCallback />} />
           </Routes>
