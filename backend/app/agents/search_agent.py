@@ -84,25 +84,27 @@ class SearchAgent(BaseAgent):
         """
         prompt = f"""You are a dataset discovery assistant. Find real, publicly available datasets related to: "{query}"
 
-Search across these sources:
-- Kaggle (kaggle.com/datasets)
-- UCI Machine Learning Repository (archive.ics.uci.edu/ml)
-- Google Dataset Search (datasetsearch.research.google.com)
+Search in these repositories:
+- Kaggle
+- UCI Machine Learning Repository
+- Google Dataset Search
 - Data.gov
 - AWS Open Data Registry
+- HuggingFace Datasets
 
-Return EXACTLY 5 relevant datasets in this JSON format:
+Return EXACTLY 5 results in this JSON format:
 [
   {{
     "title": "Dataset Name",
-    "description": "Brief description (1-2 sentences)",
-    "source": "Source name (e.g., Kaggle, UCI ML)",
-    "url": "Direct URL to dataset",
-    "format": "CSV/JSON/Parquet/etc",
-    "size_estimate": "Approximate size"
+    "description": "Brief description (1 sentence)",
+    "source": "Source Name",
+    "url": "URL to the SEARCH PAGE for this dataset (e.g., https://www.kaggle.com/search?q=dataset+name)",
+    "format": "CSV/JSON/etc",
+    "size_estimate": "Size"
   }}
 ]
 
+IMPORTANT: Do NOT guess specific dataset URLs as they might be broken. ALWAYS provide a search URL for the repository that will likely contain the dataset.
 Return ONLY the JSON array, no other text."""
 
         try:
@@ -124,8 +126,34 @@ Return ONLY the JSON array, no other text."""
             logger.error(f"Failed to parse Gemini response as JSON: {e}")
             return []
         except Exception as e:
-            logger.error(f"External dataset search failed: {e}")
-            return []
+            logger.error(f"External search failed: {e}")
+            # Fallback for demo/quota exceeded
+            return [
+                {
+                    "title": "Global Climate Data (Mock)",
+                    "description": "Historical climate data from various sources.",
+                    "source": "Kaggle",
+                    "url": "https://www.kaggle.com/search?q=global+climate+data",
+                    "format": "CSV",
+                    "size_estimate": "2GB"
+                },
+                {
+                    "title": "Financial Market Trends (Mock)",
+                    "description": "Stock market and economic indicators.",
+                    "source": "Google Dataset Search",
+                    "url": "https://datasetsearch.research.google.com/search?query=financial%20market%20trends",
+                    "format": "CSV",
+                    "size_estimate": "500MB"
+                },
+                {
+                    "title": "COVID-19 Global Statistics (Mock)",
+                    "description": "Case counts and vaccination rates.",
+                    "source": "Data.gov",
+                    "url": "https://catalog.data.gov/dataset?q=covid-19",
+                    "format": "JSON",
+                    "size_estimate": "100MB"
+                }
+            ]
     
     def _apply_filters(self, query, search_params: DatasetSearch):
         """Apply category, tag, price, and rating filters."""

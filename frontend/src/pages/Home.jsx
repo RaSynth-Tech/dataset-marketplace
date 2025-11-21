@@ -8,8 +8,8 @@ function Home() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // For demo, using user_id = 1
-    datasetService.getRecommendations(1)
+    // For demo, using user_id from token
+    datasetService.getRecommendations()
       .then(data => {
         setRecommendations(data.recommendations || [])
         setExternalRecommendations(data.external_recommendations || [])

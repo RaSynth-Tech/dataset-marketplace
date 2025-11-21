@@ -120,6 +120,30 @@ The service uses credentials from `.env` / `.env.example`.
    - API docs at `http://localhost:8000/docs`
    - Database tables visible via `psql`/pgAdmin
 
+## Quick Run Reference
+These are the exact commands to run the application locally:
+
+### 1. Database (Docker)
+From project root:
+```bash
+docker compose up db -d
+```
+
+### 2. Backend
+From `backend/` directory:
+```bash
+# Activate venv if not already active
+source venv/bin/activate
+# Run server
+uvicorn app.main:app --reload --port 8000
+```
+
+### 3. Frontend
+From `frontend/` directory:
+```bash
+npm run dev
+```
+
 ## Getting Started
 
 ### Prerequisites

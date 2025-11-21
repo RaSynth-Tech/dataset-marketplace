@@ -49,6 +49,7 @@ async def search_datasets(
     
     return {
         "datasets": datasets,
+        "external_datasets": result.get("external_datasets", []),
         "total": result["total"],
         "page": result["page"],
         "page_size": result["page_size"]
@@ -76,6 +77,7 @@ async def get_recommendations(
     
     return {
         "recommendations": recommendations,
+        "external_recommendations": result.get("external_recommendations", []),
         "count": result["count"]
     }
 
